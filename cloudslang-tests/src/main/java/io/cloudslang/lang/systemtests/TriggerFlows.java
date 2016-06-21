@@ -60,15 +60,21 @@ public class TriggerFlows {
         };
         slang.subscribeOnEvents(finishListener, FINISHED_EVENTS);
 
-        slang.run(compilationArtifact, userInputs, systemProperties);
+        Long executionID = slang.run(compilationArtifact, userInputs, systemProperties);
 
         try {
-            ScoreEvent event = finishEvent.take();
+            ScoreEvent event = null;
+            boolean finishEventNotReceived = true;
+            while (finishEventNotReceived) {
+                event = finishEvent.take();
+                Long executionIDFromEvent = (Long) ((Map) event.getData()).get(LanguageEventData.EXECUTION_ID);
+                finishEventNotReceived = !executionID.equals(executionIDFromEvent);
+            }
             if (event.getEventType().equals(ScoreLangConstants.SLANG_EXECUTION_EXCEPTION)){
                 LanguageEventData languageEvent = (LanguageEventData) event.getData();
                 throw new RuntimeException(languageEvent.getException());
             }
-            unSubscribe(finishListener);
+            slang.unSubscribeOnEvents(finishListener);
             return event;
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
@@ -98,15 +104,6 @@ public class TriggerFlows {
         slang.unSubscribeOnEvents(runDataAggregatorListener);
 
         return runtimeInformation;
-    }
-
-    private void unSubscribe(ScoreEventListener listener) {
-        try {
-            Thread.sleep(2000L);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        slang.unSubscribeOnEvents(listener);
     }
 
 }
