@@ -68,7 +68,7 @@ public class TriggerFlows {
                 LanguageEventData languageEvent = (LanguageEventData) event.getData();
                 throw new RuntimeException(languageEvent.getException());
             }
-            slang.unSubscribeOnEvents(finishListener);
+            unSubscribe(finishListener);
             return event;
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
@@ -98,6 +98,15 @@ public class TriggerFlows {
         slang.unSubscribeOnEvents(runDataAggregatorListener);
 
         return runtimeInformation;
+    }
+
+    private void unSubscribe(ScoreEventListener listener) {
+        try {
+            Thread.sleep(100L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        slang.unSubscribeOnEvents(listener);
     }
 
 }
