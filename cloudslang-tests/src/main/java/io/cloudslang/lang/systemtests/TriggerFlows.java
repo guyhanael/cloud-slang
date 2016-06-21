@@ -102,7 +102,7 @@ public class TriggerFlows {
 
     private void unSubscribe(ScoreEventListener listener) {
         try {
-            Thread.sleep(500L);
+            Thread.sleep(2000L);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
